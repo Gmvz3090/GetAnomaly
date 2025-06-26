@@ -1,16 +1,15 @@
 # GetAnomaly
 
-A fast satellite data retrieval system for accessing processed satellite data from various analyzers.
+A fast satellite data retrieval system for accessing processed satellite data from analyzers.
 
 ## Overview
 
-GetAnomaly provides a RESTful API for efficient querying of satellite data that has been processed and stored in a MongoDB database. The system is optimized for time-based queries with indexed timestamps for fast data retrieval.
+GetAnomaly provides a query API for retrieval of satellite data that has been processed and stored in a MongoDB database. The system is optimized for time-based queries with indexed timestamps for fast data retrieval.
 
 ## Features
 
-- Fast time-range based data retrieval
-- MongoDB with indexed timestamps for optimal performance
-- RESTful API built with FastAPI
+- MongoDB with indexed timestamps for flexibility (Additional data that isint in every record)
+- Query API built with FastAPI
 - Docker containerized deployment
 - Automatic data ingestion from Parquet files
 - JSON response format with proper serialization
@@ -19,7 +18,6 @@ GetAnomaly provides a RESTful API for efficient querying of satellite data that 
 
 - **API Server**: FastAPI application running on port 8000
 - **Database**: MongoDB for data storage with timestamp indexing
-- **Data Format**: Satellite data stored as documents with timestamp fields
 - **Deployment**: Docker Compose for easy deployment and scaling
 
 ## Quick Start
@@ -34,7 +32,7 @@ GetAnomaly provides a RESTful API for efficient querying of satellite data that 
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Gmvz3090/GetAnomaly
 cd GetAnomaly
 ```
 
@@ -67,8 +65,13 @@ GET /get?start_time=<ISO_DATETIME>&end_time=<ISO_DATETIME>
 Retrieves satellite data within the specified time range.
 
 **Parameters:**
-- `start_time`: ISO format datetime (e.g., `2007-01-01T00:07:30`)
-- `end_time`: ISO format datetime (e.g., `2007-01-01T01:00:00`)
+
+- `start_time`/`end_time`: ISO format datetime (For ex. : `2007-01-01T00:07:30`)
+
+**Example:**
+```bash
+curl "http://localhost:8000/get?start_time=2007-01-01T00:07:30&end_time=2007-01-01T01:00:00"
+```
 
 **Response:**
 ```json
@@ -79,9 +82,17 @@ Retrieves satellite data within the specified time range.
     {
       "_id": "...",
       "timestamp": "2007-01-01T00:07:30",
-      "...": "other_satellite_data_fields"
+      "...": "satellite_data_fields"
     }
   ]
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "no_data_in_range"
 }
 ```
 
@@ -89,16 +100,26 @@ Retrieves satellite data within the specified time range.
 ```
 GET /getexample?lim=<NUMBER>
 ```
-Returns a limited number of sample records.
+Returns a limited number of sample records for testing.
 
 **Parameters:**
 - `lim`: Maximum number of records to return
+
+**Example:**
+```bash
+curl "http://localhost:8000/getexample?lim=5"
+```
 
 ### Get All Data
 ```
 GET /getall
 ```
-Returns all data sorted by timestamp (use with caution for large datasets).
+**Warning**: Use with caution for large datasets as this endpoint returns all records.
+
+**Example:**
+```bash
+curl "http://localhost:8000/getall"
+```
 
 ## Data Format
 
@@ -160,7 +181,7 @@ Once running, visit `http://localhost:8000/docs` for interactive Swagger documen
 
 ## Error Handling
 
-The API returns structured error responses:
+The API returns structured error responses with `success: false`:
 
 ```json
 {
@@ -170,22 +191,13 @@ The API returns structured error responses:
 ```
 
 Common error types:
-- `date_parse_error`: Invalid datetime format
-- `no_data_in_range`: No data found for specified time range
-- `db_error`: Database connection issues
+- `date_parse_error`: Invalid datetime format in query parameters
+- `no_data_in_range`: No satellite data found for specified time range
+- `db_error`: Database connection or query issues
 
-## Contributing
+## Roadmap
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+- `More Compression` for further memory optim.
+- `Time Based Partitioning` for quicker queries and easier manual investigation.
+- `MongoDB -> ClickHouse` for faster queries.
 
-## License
-
-[Add your license information here]
-
-## Support
-
-For issues and questions, please open a GitHub issue or contact the development team.
