@@ -1,0 +1,22 @@
+version: '1.0'
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017/
+    depends_on:
+      - mongo
+    command: sh -c "sleep 10 && python uploadtomongo.py && uvicorn api:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  mongo_data:
