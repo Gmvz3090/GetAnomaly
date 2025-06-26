@@ -33,7 +33,6 @@ def getfrom(start_time: str, end_time: str):
         print(f"Date parse error: {e}")
         return {"success": False, "error": "date_parse_error"}
     
-    # Użyj normalnego MongoDB query z indeksem
     cursor = collection.find({
         "timestamp": {"$gte": start_dt, "$lte": end_dt}
     }).sort("timestamp", 1)
